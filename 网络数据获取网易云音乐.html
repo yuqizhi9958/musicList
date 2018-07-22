@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="app">
+        <h2>点歌台</h2>
+        <input type="text" placeholder="请输入搜索的歌曲" v-model="music" @keyup.enter="searchMusic">
+        <input type="text" placeholder="请输入歌手名" v-model="singer" @keyup.enter="searchMusic">
+        <ul>
+            <li v-for="(item, index) in renderList" :key="item.id">
+                {{item.name}}---{{item.artists[0].name}}
+            </li>
+        </ul>
+    </div>
+</body>
+
+</html>
+<script src="../vue.min.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    //实例化
+    let app = new Vue({
+        el: ".app",
+        data: {
+            singer: "",
+            music: "",
+            musicList: []
+        },
+        methods: {
+            searchMusic() {
+                //调用接口
+                axios({
+                        method: 'get',
+                        url: `http://39.108.140.202:3000/search?keywords=${this.music}`
+                    })
+                    .then((response) => {
+                        console.log(response);
+                        this.musicList = response.data.result.songs;
+
+                    })
+                    .catch((error)=>{
+                        console.log(error);
+                    })
+            }   
+        },
+        computed:{
+            renderList(){
+                //数组中筛选方法
+               return this.musicList.filter((v,i)=>{
+                    //传入名字 在当前歌手名中存在
+                    //indexOf != -1 即可
+                    if (v.artists[0].name.indexOf(this.singer) != -1) {
+                        return v;
+                    }
+                })
+            }
+        }
+    })
+</script>
